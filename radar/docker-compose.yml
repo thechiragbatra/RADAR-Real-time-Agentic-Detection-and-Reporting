@@ -1,0 +1,17 @@
+# Local stack: the scoring service with the models/ directory mounted as the registry.
+#   docker compose up --build
+#   curl -s localhost:8000/health
+services:
+  scorer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.scorer
+    ports:
+      - "8000:8000"
+    environment:
+      RADAR_ENV: local
+      RADAR_MODEL_URI: /models
+      RADAR_MODEL_REFRESH_SECONDS: "10"
+      WEB_CONCURRENCY: "2"
+    volumes:
+      - ./models:/models:ro

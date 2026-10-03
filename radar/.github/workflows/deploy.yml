@@ -1,0 +1,99 @@
+name: deploy
+
+# Builds both images, pushes them to ECR tagged with the git sha, applies Terraform with that
+# tag (which updates the ECS task definition and the three Lambda image URIs), and waits for
+# the ECS service to stabilise. Uses GitHub OIDC - no long-lived AWS keys in the repo.
+#
+# Required repository configuration:
+#   secrets.AWS_DEPLOY_ROLE_ARN   IAM role trusting this repo's OIDC provider
+#   secrets.SCORER_API_KEY        shared secret for the ALB header rule
+#   vars.AWS_REGION               e.g. ap-south-1
+
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "docker/**", "infra/**", "pyproject.toml", ".github/workflows/deploy.yml"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+          terraform_wrapper: false
+
+      # ECR repositories are created by Terraform; make sure they exist before pushing.
+      - name: terraform init + ensure ECR repos
+        working-directory: infra/terraform
+        env:
+          TF_VAR_scorer_api_key: ${{ secrets.SCORER_API_KEY }}
+        run: |
+          terraform init
+          terraform apply -auto-approve -var-file=envs/dev.tfvars \
+            -target=aws_ecr_repository.scorer -target=aws_ecr_repository.lambda
+          echo "ECR_SCORER=$(terraform output -raw ecr_scorer)" >> "$GITHUB_ENV"
+          echo "ECR_LAMBDA=$(terraform output -raw ecr_lambda)" >> "$GITHUB_ENV"
+
+      - uses: aws-actions/amazon-ecr-login@v2
+      - uses: docker/setup-buildx-action@v3
+
+      - name: build + push scorer
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.scorer
+          push: true
+          tags: ${{ env.ECR_SCORER }}:${{ env.IMAGE_TAG }},${{ env.ECR_SCORER }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: build + push lambda
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.lambda
+          push: true
+          tags: ${{ env.ECR_LAMBDA }}:${{ env.IMAGE_TAG }},${{ env.ECR_LAMBDA }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: terraform apply
+        working-directory: infra/terraform
+        env:
+          TF_VAR_scorer_api_key: ${{ secrets.SCORER_API_KEY }}
+        run: |
+          terraform apply -auto-approve -var-file=envs/dev.tfvars -var "image_tag=${IMAGE_TAG}"
+          echo "CLUSTER=$(terraform output -raw ecs_cluster)" >> "$GITHUB_ENV"
+          echo "SCORER_URL=$(terraform output -raw scorer_url)" >> "$GITHUB_ENV"
+
+      - name: wait for the scorer service to stabilise
+        run: |
+          aws ecs wait services-stable --cluster "$CLUSTER" --services "$CLUSTER-scorer"
+
+      - name: smoke test
+        run: |
+          curl -fsS -H "x-radar-key: ${{ secrets.SCORER_API_KEY }}" "$SCORER_URL/health"

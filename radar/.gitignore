@@ -1,0 +1,29 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+
+# data & models are generated; keep the small eval artefacts
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+evals/results/*.traces.jsonl
+loadtest/results/
+mlruns/
+
+# terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate*
+infra/terraform/.terraform.lock.hcl
+*.tfvars.secret
+
+# env
+.env

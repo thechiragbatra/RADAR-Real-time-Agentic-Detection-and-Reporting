@@ -1,0 +1,17 @@
+# One image for all three Lambda functions (handler selected per function via image_config)
+# and for the ECS retraining task (entrypoint overridden to python -m radar.model.retrain).
+FROM public.ecr.aws/lambda/python:3.12
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    OMP_NUM_THREADS=1 \
+    MPLBACKEND=Agg
+
+RUN dnf install -y libgomp && dnf clean all
+
+COPY pyproject.toml README.md ${LAMBDA_TASK_ROOT}/
+COPY src ${LAMBDA_TASK_ROOT}/src
+RUN pip install --no-cache-dir ${LAMBDA_TASK_ROOT}
+
+# Default handler; Terraform overrides per function.
+CMD ["radar.lambdas.stream_consumer.handler"]

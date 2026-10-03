@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radar"
+version = "0.1.0"
+description = "RADAR - Real-time Agentic Detection and Reporting: fraud detection with an agentic investigation layer, on AWS"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Chirag Batra" }]
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "pyarrow>=14",
+    "scikit-learn>=1.4",
+    "xgboost>=2.0",
+    "shap>=0.45",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.1",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "boto3>=1.34",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "moto[dynamodb,s3,sqs,kinesis]>=5.0",
+    "locust>=2.24",
+]
+mlops = [
+    "mlflow>=2.12",
+]
+
+[project.scripts]
+radar-simulate = "radar.simulator.generate:main"
+radar-produce = "radar.simulator.producer:main"
+radar-train = "radar.model.train:main"
+radar-serve = "radar.scoring.api:main"
+radar-investigate = "radar.agent.cli:main"
+radar-retrain = "radar.model.retrain:main"
+radar-eval = "radar.evals.harness:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+radar = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "evals"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+ignore = ["E501"]

@@ -1,0 +1,182 @@
+[
+  {
+    "feature": "device_user_age_days",
+    "mean_abs_shap": 0.8898295760154724
+  },
+  {
+    "feature": "seconds_since_last",
+    "mean_abs_shap": 0.44871288537979126
+  },
+  {
+    "feature": "hour_local",
+    "mean_abs_shap": 0.3123438060283661
+  },
+  {
+    "feature": "speed_kmh",
+    "mean_abs_shap": 0.2522711157798767
+  },
+  {
+    "feature": "amount",
+    "mean_abs_shap": 0.23557192087173462
+  },
+  {
+    "feature": "channel_card",
+    "mean_abs_shap": 0.21042723953723907
+  },
+  {
+    "feature": "device_age_days",
+    "mean_abs_shap": 0.20090904831886292
+  },
+  {
+    "feature": "is_online",
+    "mean_abs_shap": 0.1935839205980301
+  },
+  {
+    "feature": "txn_count_1h",
+    "mean_abs_shap": 0.18864008784294128
+  },
+  {
+    "feature": "amount_ratio_mean",
+    "mean_abs_shap": 0.13253556191921234
+  },
+  {
+    "feature": "category_risk",
+    "mean_abs_shap": 0.13088662922382355
+  },
+  {
+    "feature": "amount_sum_24h",
+    "mean_abs_shap": 0.12581542134284973
+  },
+  {
+    "feature": "is_home_city",
+    "mean_abs_shap": 0.1227344498038292
+  },
+  {
+    "feature": "txn_count_total",
+    "mean_abs_shap": 0.10494588315486908
+  },
+  {
+    "feature": "cat_grocery",
+    "mean_abs_shap": 0.09506433457136154
+  },
+  {
+    "feature": "account_age_days",
+    "mean_abs_shap": 0.09049121290445328
+  },
+  {
+    "feature": "amount_z",
+    "mean_abs_shap": 0.08527003973722458
+  },
+  {
+    "feature": "device_user_count",
+    "mean_abs_shap": 0.0685950294137001
+  },
+  {
+    "feature": "distance_from_last_km",
+    "mean_abs_shap": 0.0565720833837986
+  },
+  {
+    "feature": "merchant_age_days",
+    "mean_abs_shap": 0.05134928598999977
+  },
+  {
+    "feature": "amount_log",
+    "mean_abs_shap": 0.042504675686359406
+  },
+  {
+    "feature": "is_new_device",
+    "mean_abs_shap": 0.03170464187860489
+  },
+  {
+    "feature": "is_new_merchant",
+    "mean_abs_shap": 0.03001859039068222
+  },
+  {
+    "feature": "channel_netbanking",
+    "mean_abs_shap": 0.026531552895903587
+  },
+  {
+    "feature": "user_device_count",
+    "mean_abs_shap": 0.022905126214027405
+  },
+  {
+    "feature": "small_txn_count_1h",
+    "mean_abs_shap": 0.019400931894779205
+  },
+  {
+    "feature": "is_night",
+    "mean_abs_shap": 0.01647277921438217
+  },
+  {
+    "feature": "txn_count_24h",
+    "mean_abs_shap": 0.014731127768754959
+  },
+  {
+    "feature": "cat_utilities",
+    "mean_abs_shap": 0.014271356165409088
+  },
+  {
+    "feature": "is_weekend",
+    "mean_abs_shap": 0.01254656258970499
+  },
+  {
+    "feature": "cat_food_delivery",
+    "mean_abs_shap": 0.012297243811190128
+  },
+  {
+    "feature": "cat_travel",
+    "mean_abs_shap": 0.011718896217644215
+  },
+  {
+    "feature": "cat_electronics",
+    "mean_abs_shap": 0.008805835619568825
+  },
+  {
+    "feature": "cat_pharmacy",
+    "mean_abs_shap": 0.003807211294770241
+  },
+  {
+    "feature": "cat_mobile_recharge",
+    "mean_abs_shap": 0.003245709231123328
+  },
+  {
+    "feature": "cat_apparel",
+    "mean_abs_shap": 0.0030027444008737803
+  },
+  {
+    "feature": "cat_gaming",
+    "mean_abs_shap": 0.0024791175965219736
+  },
+  {
+    "feature": "cat_fuel",
+    "mean_abs_shap": 0.002126469975337386
+  },
+  {
+    "feature": "cat_crypto",
+    "mean_abs_shap": 0.0015965369530022144
+  },
+  {
+    "feature": "cat_jewellery",
+    "mean_abs_shap": 0.0015391535125672817
+  },
+  {
+    "feature": "cat_ecommerce",
+    "mean_abs_shap": 0.0015343661652877927
+  },
+  {
+    "feature": "cat_forex",
+    "mean_abs_shap": 0.001031177002005279
+  },
+  {
+    "feature": "cat_entertainment",
+    "mean_abs_shap": 0.00036753504537045956
+  },
+  {
+    "feature": "is_international",
+    "mean_abs_shap": 0.0
+  },
+  {
+    "feature": "cat_gift_cards",
+    "mean_abs_shap": 0.0
+  }
+]

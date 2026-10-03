@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+      - run: pytest -q -p no:warnings --cov=radar --cov-report=term-missing
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - run: terraform fmt -check -recursive
+        working-directory: infra/terraform
+      - run: terraform init -backend=false
+        working-directory: infra/terraform
+      - run: terraform validate
+        working-directory: infra/terraform
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: build scorer image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.scorer
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: build lambda image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.lambda
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
