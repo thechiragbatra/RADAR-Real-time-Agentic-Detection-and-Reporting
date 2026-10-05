@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
+from radar.config import settings
 from radar.features import FEATURE_NAMES
 from radar.model.registry import ModelRegistry
 from radar.scoring.api import create_app
@@ -29,6 +30,23 @@ def test_health_and_model(client):
     assert h["status"] == "ok" and h["model_version"] == "vtest"
     m = client.get("/model").json()
     assert m["version"] == "vtest" and "feature_stats" not in m and "metrics" in m
+
+
+def test_api_key_protects_public_routes(models_dir: Path, monkeypatch):
+    monkeypatch.setattr(settings, "scorer_api_key", "test-secret")
+    app = create_app(str(models_dir))
+    with TestClient(app) as c:
+        assert c.get("/health").status_code == 200
+        assert c.get("/model").status_code == 401
+        assert c.get("/model", headers={"x-radar-key": "wrong"}).status_code == 401
+        assert c.get("/model", headers={"x-radar-key": "test-secret"}).status_code == 200
+
+
+def test_production_requires_api_key(monkeypatch):
+    monkeypatch.setattr(settings, "env", "prod")
+    monkeypatch.setattr(settings, "scorer_api_key", "")
+    with pytest.raises(RuntimeError, match="RADAR_SCORER_API_KEY"):
+        create_app()
 
 
 def test_score_contract_and_explain_only_when_flagged(client, feature_rows):

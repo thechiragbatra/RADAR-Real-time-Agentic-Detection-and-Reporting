@@ -11,14 +11,17 @@ Runs as a container on ECS Fargate behind an ALB; see infra/terraform/ecs.tf.
 
 from __future__ import annotations
 
+import hmac
 import logging
 import os
 import threading
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import PlainTextResponse
+from starlette.middleware.base import RequestResponseEndpoint
+from starlette.responses import Response
 
 from radar.config import settings
 from radar.schemas import ScoreRequest, ScoreResponse
@@ -69,6 +72,9 @@ class Metrics:
 
 
 def create_app(registry_uri: str | None = None) -> FastAPI:
+    if settings.env == "prod" and not settings.scorer_api_key:
+        raise RuntimeError("RADAR_SCORER_API_KEY must be set when RADAR_ENV=prod")
+
     loader = ChampionLoader(registry_uri or settings.model_uri, settings.model_refresh_seconds)
     metrics = Metrics()
 
@@ -80,6 +86,15 @@ def create_app(registry_uri: str | None = None) -> FastAPI:
     app = FastAPI(title="RADAR scoring service", version="0.1.0", lifespan=lifespan)
     app.state.loader = loader
     app.state.metrics = metrics
+
+    @app.middleware("http")
+    async def require_api_key(request: Request, call_next: RequestResponseEndpoint) -> Response:
+        api_key = settings.scorer_api_key
+        if request.url.path != "/health" and api_key:
+            supplied = request.headers.get("x-radar-key", "")
+            if not hmac.compare_digest(supplied.encode(), api_key.encode()):
+                return PlainTextResponse("Unauthorized", status_code=401)
+        return await call_next(request)
 
     @app.get("/health")
     def health() -> dict:

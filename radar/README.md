@@ -109,6 +109,25 @@ send this to review rather than block it; the eval harness measures whether it d
 [docs/runbook.md](docs/runbook.md) — Terraform apply, image push, bootstrap, traffic replay,
 forcing a drift event, cost (~$60/month while running, near zero when stopped), tear-down.
 
+## Deploy the scorer on Render
+
+The root-level [`render.yaml`](../render.yaml) defines a Docker web service in Singapore on
+Render's Starter plan. In Render,
+create a Blueprint from this repository. Render generates a secret `RADAR_SCORER_API_KEY`
+automatically. The image builds the synthetic training data and model during deployment, so
+no ignored local model files or persistent disk are needed. This makes image builds longer; each
+deployment gets its own fresh model, and runtime model promotion is not persisted.
+
+The `/health` route is public for Render's health checks. Send the configured secret in the
+`x-radar-key` header for every other route, for example:
+
+```
+curl -H "x-radar-key: $RADAR_SCORER_API_KEY" https://<your-render-service>.onrender.com/model
+```
+
+Render's Starter plan is a paid service. Keep the API key in Render's environment settings; do not
+commit it or put it in a client-side application.
+
 ## Repository layout
 
 ```

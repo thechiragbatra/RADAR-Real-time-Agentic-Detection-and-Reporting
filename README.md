@@ -124,6 +124,8 @@ send this to review rather than block it; the eval harness measures whether it d
 [docs/runbook.md](https://github.com/thechiragbatra/radar-fraud/blob/main/docs/runbook.md) — Terraform apply, image push, bootstrap, traffic replay,
 forcing a drift event, cost (~$60/month while running, near zero when stopped), tear-down.
 
+For a hosted scoring API without AWS, see the [Render deployment setup](radar/README.md#deploy-the-scorer-on-render).
+
 ### Repository layout
 
 ```
@@ -634,4 +636,3 @@ radar/
 ```
 
 ---
-

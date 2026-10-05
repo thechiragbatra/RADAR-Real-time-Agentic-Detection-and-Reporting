@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: radar-scorer
+    runtime: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./radar/docker/Dockerfile.render
+    dockerContext: ./radar
+    healthCheckPath: /health
+    envVars:
+      - key: RADAR_ENV
+        value: prod
+      - key: RADAR_MODEL_URI
+        value: /app/models
+      - key: RADAR_SCORER_API_KEY
+        generateValue: true
