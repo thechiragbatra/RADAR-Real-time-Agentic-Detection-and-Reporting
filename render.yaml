@@ -14,3 +14,5 @@ services:
         value: /app/models
       - key: RADAR_SCORER_API_KEY
         generateValue: true
+      - key: WEB_CONCURRENCY
+        value: "1"

@@ -117,6 +117,8 @@ create a Blueprint from this repository. Render generates a secret `RADAR_SCORER
 automatically. The image builds the synthetic training data and model during deployment, so
 no ignored local model files or persistent disk are needed. This makes image builds longer; each
 deployment gets its own fresh model, and runtime model promotion is not persisted.
+On Linux x86_64, the project installs XGBoost's CPU-only package; the scorer does not use GPUs.
+The Blueprint limits the Starter instance to one worker.
 
 The `/health` route is public for Render's health checks. Send the configured secret in the
 `x-radar-key` header for every other route, for example:
